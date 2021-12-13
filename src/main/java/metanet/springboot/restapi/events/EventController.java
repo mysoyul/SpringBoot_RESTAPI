@@ -24,8 +24,9 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+        //입력항목 검증 오류가 발생했다면
         if(errors.hasErrors()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(errors);//build();
         }
 
         //EventDto -> Event 로 매핑
