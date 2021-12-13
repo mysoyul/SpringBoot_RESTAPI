@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import javax.validation.Valid;
 import java.net.URI;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 @Controller
 @RequestMapping(value = "/api/events", produces = MediaTypes.HAL_JSON_VALUE)
 @RequiredArgsConstructor
@@ -27,23 +29,33 @@ public class EventController {
     public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
         //입력항목 검증 오류가 발생했다면
         if(errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);//build();
+            return badRequest(errors);
         }
 
         //입력항목에 로직의 검증 오류가 발생했다면
         eventValidator.validate(eventDto, errors);
         if(errors.hasErrors()) {
-            return ResponseEntity.badRequest().body(errors);//build();
+            return badRequest(errors);
         }
 
         //EventDto -> Event 로 매핑
         Event event = modelMapper.map(eventDto, Event.class);
 
+        event.update();
         Event addEvent = eventRepository.save(event);
 
         //http://localhost:8087/api/events/10
-        WebMvcLinkBuilder selfLinkBuilder = WebMvcLinkBuilder.linkTo(EventController.class).slash(event.getId());
+        WebMvcLinkBuilder selfLinkBuilder = linkTo(EventController.class).slash(event.getId());
         URI createdUri = selfLinkBuilder.toUri();
-        return ResponseEntity.created(createdUri).body(addEvent);
+
+        EventResource eventResource = new EventResource(addEvent);
+        eventResource.add(linkTo(EventController.class).withRel("query-events"));
+        eventResource.add(selfLinkBuilder.withSelfRel());
+        eventResource.add(selfLinkBuilder.withRel("update-event"));
+        return ResponseEntity.created(createdUri).body(eventResource);
+    }
+
+    private ResponseEntity<?> badRequest(Errors errors) {
+        return ResponseEntity.badRequest().body(errors);//build();
     }
 }
