@@ -1,6 +1,7 @@
 package metanet.springboot.restapi.events;
 
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,13 @@ import java.net.URI;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final ModelMapper modelMapper;
 
     @PostMapping
-    public ResponseEntity<?> createEvent(@RequestBody Event event) {
+    public ResponseEntity<?> createEvent(@RequestBody EventDto eventDto) {
+        //EventDto -> Event 로 매핑
+        Event event = modelMapper.map(eventDto, Event.class);
+
         Event addEvent = eventRepository.save(event);
 
         //http://localhost:8087/api/events/10

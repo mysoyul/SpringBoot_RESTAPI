@@ -1,35 +1,30 @@
 package metanet.springboot.restapi.events;
 
-import lombok.*;
-
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-@Builder
-@AllArgsConstructor
+@Data @Builder
 @NoArgsConstructor
-@Getter
-@Setter
-@EqualsAndHashCode(of="id")
-@Entity
-public class Event {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+@AllArgsConstructor
+public class EventDto {
     private String name;
     private String description;
 
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime beginEnrollmentDateTime;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime closeEnrollmentDateTime;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime beginEventDateTime;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm")
     private LocalDateTime endEventDateTime;
 
     private String location;
     private int basePrice;
     private int maxPrice;
     private int limitOfEnrollment;
-    private boolean offline;
-    private boolean free;
-
-    @Enumerated(EnumType.STRING)
-    private EventStatus eventStatus = EventStatus.DRAFT;
 }
