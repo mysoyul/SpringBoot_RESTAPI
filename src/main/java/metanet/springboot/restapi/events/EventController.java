@@ -1,6 +1,7 @@
 package metanet.springboot.restapi.events;
 
 import lombok.RequiredArgsConstructor;
+import metanet.springboot.restapi.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
@@ -56,6 +57,6 @@ public class EventController {
     }
 
     private ResponseEntity<?> badRequest(Errors errors) {
-        return ResponseEntity.badRequest().body(errors);//build();
+        return ResponseEntity.badRequest().body(new ErrorsResource(errors));//build();
     }
 }
