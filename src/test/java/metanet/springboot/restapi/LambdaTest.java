@@ -5,8 +5,15 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 public class LambdaTest {
+
+    @Test
+    public void stream() {
+        //IntStream.rangeClosed(0, 15).forEach(val -> System.out.println("val = " + val));
+        IntStream.rangeClosed(0, 15).forEach(System.out::println);
+    }
 
     @Test
     public void iterable() {
