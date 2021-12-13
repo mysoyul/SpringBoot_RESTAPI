@@ -21,10 +21,17 @@ public class EventController {
 
     private final EventRepository eventRepository;
     private final ModelMapper modelMapper;
+    private final EventValidator eventValidator;
 
     @PostMapping
     public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
         //입력항목 검증 오류가 발생했다면
+        if(errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(errors);//build();
+        }
+
+        //입력항목에 로직의 검증 오류가 발생했다면
+        eventValidator.validate(eventDto, errors);
         if(errors.hasErrors()) {
             return ResponseEntity.badRequest().body(errors);//build();
         }
