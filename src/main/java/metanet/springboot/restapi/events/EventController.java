@@ -9,18 +9,15 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
@@ -33,20 +30,37 @@ public class EventController {
     private final ModelMapper modelMapper;
     private final EventValidator eventValidator;
 
+    @GetMapping("/{id}")
+    public ResponseEntity getEvent(@PathVariable Integer id) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        
+        //Optional객체에 포함된 Event 객체가 null이면 404 오류코드 발생
+        //if(!optionalEvent.isPresent())
+        if(optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        //Optional객체에 포함된 Event 객체가 있다면 꺼내기
+        Event event = optionalEvent.get();
+        return ResponseEntity.ok(new EventResource(event));
+    }
+
+
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
         Page<Event> eventPage = this.eventRepository.findAll(pageable);
         //PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(eventPage);
 
-        PagedModel<RepresentationModel<EventResource>> pagedModel =
-                assembler.toModel(eventPage, new RepresentationModelAssembler<Event, RepresentationModel<EventResource>>() {
-            @Override
-            public RepresentationModel<EventResource> toModel(Event entity) {
-                return new EventResource(entity);
-            }
-        });
+        //두번째 아규먼트인 RepresentationModelAssembler를 익명클래스로 만들어서 toModel() 메서드들 재정의
+//        PagedModel<RepresentationModel<EventResource>> pagedModel =
+//                assembler.toModel(eventPage, new RepresentationModelAssembler<Event, RepresentationModel<EventResource>>() {
+//            @Override
+//            public RepresentationModel<EventResource> toModel(Event entity) {
+//                return new EventResource(entity);
+//            }
+//        });
 
-        //PagedModel<RepresentationModel<EventResource>> pagedModel = assembler.toModel(eventPage, event -> new EventResource(event));
+        //두번째 아규먼트인 RepresentationModelAssembler를 람다식으로 만들어서 toModel() 메서드를 재정의
+        PagedModel<RepresentationModel<EventResource>> pagedModel = assembler.toModel(eventPage, event -> new EventResource(event));
         return ResponseEntity.ok(pagedModel);
     }
 
