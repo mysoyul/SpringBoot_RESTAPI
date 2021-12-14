@@ -6,9 +6,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -35,7 +36,17 @@ public class EventController {
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler) {
         Page<Event> eventPage = this.eventRepository.findAll(pageable);
-        PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(eventPage);
+        //PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(eventPage);
+
+        PagedModel<RepresentationModel<EventResource>> pagedModel =
+                assembler.toModel(eventPage, new RepresentationModelAssembler<Event, RepresentationModel<EventResource>>() {
+            @Override
+            public RepresentationModel<EventResource> toModel(Event entity) {
+                return new EventResource(entity);
+            }
+        });
+
+        //PagedModel<RepresentationModel<EventResource>> pagedModel = assembler.toModel(eventPage, event -> new EventResource(event));
         return ResponseEntity.ok(pagedModel);
     }
 
