@@ -3,6 +3,7 @@ package metanet.springboot.restapi.config;
 import metanet.springboot.restapi.accounts.Account;
 import metanet.springboot.restapi.accounts.AccountRole;
 import metanet.springboot.restapi.accounts.AccountService;
+import metanet.springboot.restapi.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -34,11 +35,14 @@ public class AppConfig {
         return new ApplicationRunner() {
             @Autowired
             AccountService accountService;
+            @Autowired
+            AppProperties appProperties;
+
             @Override
             public void run(ApplicationArguments args) throws Exception {
                 Account account = Account.builder()
-                        .email("user@email.com")
-                        .password("user")
+                        .email(appProperties.getUserUsername())
+                        .password(appProperties.getUserPassword())
                         .roles(Set.of(AccountRole.ADMIN,AccountRole.USER))
                         .build();
                 accountService.saveAccount(account);

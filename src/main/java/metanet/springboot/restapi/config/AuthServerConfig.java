@@ -2,6 +2,7 @@ package metanet.springboot.restapi.config;
 
 import lombok.RequiredArgsConstructor;
 import metanet.springboot.restapi.accounts.AccountService;
+import metanet.springboot.restapi.common.AppProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     private final AuthenticationManager authenticationManager;
     private final TokenStore tokenStore;
     private final AccountService accountService;
+    private final AppProperties appProperties;
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
@@ -37,9 +39,9 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 //client_id
-                .withClient("myApp")
+                .withClient(appProperties.getClientId())
                 //client_secret
-                .secret(this.passwordEncoder.encode("pass"))
+                .secret(this.passwordEncoder.encode(appProperties.getClientSecret()))
                 //password - password cridential grant 방식, refresh_token - access token 갱신할때
                 .authorizedGrantTypes("password", "refresh_token")
                 //접근범위
