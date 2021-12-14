@@ -10,6 +10,7 @@ import java.util.Set;
 @Builder @AllArgsConstructor @NoArgsConstructor
 public class Account {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@Column(name = "account_id")
     private Integer id;
 
     @Column(unique = true)

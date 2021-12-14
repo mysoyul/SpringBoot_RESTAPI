@@ -1,6 +1,7 @@
 package metanet.springboot.restapi.events;
 
 import lombok.*;
+import metanet.springboot.restapi.accounts.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -32,6 +33,11 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT;
+
+    //@ManyToOne(cascade = {CascadeType.ALL})
+    //@JoinColumn(name="account_id", nullable = false)
+    @ManyToOne
+    private Account account;
 
     public void update() {
         // Update free

@@ -6,14 +6,13 @@ import metanet.springboot.restapi.events.EventStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.stream.IntStream;
 
 @Component
-@Order(1)
+//@Order(2)
 public class EventInsertRunner implements ApplicationRunner {
     @Autowired
     EventRepository eventRepository;
@@ -21,8 +20,9 @@ public class EventInsertRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
         //IntStream.rangeClosed(0,15).forEach(val -> generateEvent(val));
-        IntStream.rangeClosed(0,15).forEach(this::generateEvent);
+        IntStream.rangeClosed(0,6).forEach(this::generateEvent);
     }
+
 
     private Event generateEvent(int index) {
         Event event = buildEvent(index);
