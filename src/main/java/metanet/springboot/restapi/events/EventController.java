@@ -55,7 +55,9 @@ public class EventController {
 
         //DB에서 읽어온 Event객체와 수정하려는 데이터를 담고 있는 EventDto 객체를 매핑
         modelMapper.map(eventDto, existEvent);
+
         //DB에 수정 요청
+        existEvent.update();
         Event savedEvent = eventRepository.save(existEvent);
 
         return ResponseEntity.ok(new EventResource(savedEvent));
