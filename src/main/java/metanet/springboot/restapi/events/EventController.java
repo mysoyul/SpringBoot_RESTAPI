@@ -30,6 +30,38 @@ public class EventController {
     private final ModelMapper modelMapper;
     private final EventValidator eventValidator;
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors){
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+
+        //Optional객체에 포함된 Event 객체가 null이면 404 오류코드 발생
+        //if(!optionalEvent.isPresent())
+        if(optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        //입력항목 검증 오류가 발생했다면
+        if(errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        //입력항목에 로직의 검증 오류가 발생했다면
+        eventValidator.validate(eventDto, errors);
+        if(errors.hasErrors()) {
+            return badRequest(errors);
+        }
+
+        //Optional객체에 포함된 Event 객체가 있다면 꺼내기
+        Event existEvent = optionalEvent.get();
+
+        //DB에서 읽어온 Event객체와 수정하려는 데이터를 담고 있는 EventDto 객체를 매핑
+        modelMapper.map(eventDto, existEvent);
+        //DB에 수정 요청
+        Event savedEvent = eventRepository.save(existEvent);
+
+        return ResponseEntity.ok(new EventResource(savedEvent));
+    }
+
+
     @GetMapping("/{id}")
     public ResponseEntity getEvent(@PathVariable Integer id) {
         Optional<Event> optionalEvent = this.eventRepository.findById(id);
