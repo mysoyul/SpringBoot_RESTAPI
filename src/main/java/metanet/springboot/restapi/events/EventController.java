@@ -12,6 +12,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
@@ -33,7 +34,7 @@ public class EventController {
     private final EventValidator eventValidator;
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors){
+    public ResponseEntity<?> updateEvent(@PathVariable Integer id, @RequestBody @Valid EventDto eventDto, Errors errors, @CurrentUser Account account){
         Optional<Event> optionalEvent = this.eventRepository.findById(id);
 
         //Optional객체에 포함된 Event 객체가 null이면 404 오류코드 발생
@@ -55,6 +56,13 @@ public class EventController {
         //Optional객체에 포함된 Event 객체가 있다면 꺼내기
         Event existEvent = optionalEvent.get();
 
+        //등록한 사용자와 수정을 하려는 사용자가 일치하지 않으면 권한없음401 오류코드 발생
+        if((existEvent.getAccount() != null) && (!existEvent.getAccount().equals(account))) {
+            //return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("수정할 수 있는 권한이 없습니다.");
+        }
+
+
         //DB에서 읽어온 Event객체와 수정하려는 데이터를 담고 있는 EventDto 객체를 매핑
         modelMapper.map(eventDto, existEvent);
 
@@ -67,7 +75,7 @@ public class EventController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity getEvent(@PathVariable Integer id) {
+    public ResponseEntity getEvent(@PathVariable Integer id, @CurrentUser Account account) {
         Optional<Event> optionalEvent = this.eventRepository.findById(id);
         
         //Optional객체에 포함된 Event 객체가 null이면 404 오류코드 발생
@@ -77,7 +85,14 @@ public class EventController {
         }
         //Optional객체에 포함된 Event 객체가 있다면 꺼내기
         Event event = optionalEvent.get();
-        return ResponseEntity.ok(new EventResource(event));
+        EventResource eventResource = new EventResource(event);
+
+        //access token을 사용하여 조회를 했다면 Event를 수정할 수 있는 Link를 제공한다.
+        if((event.getAccount() != null) && (event.getAccount().equals(account))) {
+            eventResource.add(linkTo(EventController.class).slash(event.getId()).withRel("update-event"));
+        }
+
+        return ResponseEntity.ok(eventResource);
     }
 
 
@@ -110,7 +125,7 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors) {
+    public ResponseEntity<?> createEvent(@RequestBody @Valid EventDto eventDto, Errors errors, @CurrentUser Account account) {
         //입력항목 검증 오류가 발생했다면
         if(errors.hasErrors()) {
             return badRequest(errors);
@@ -126,6 +141,7 @@ public class EventController {
         Event event = modelMapper.map(eventDto, Event.class);
 
         event.update();
+        event.setAccount(account);
         Event addEvent = eventRepository.save(event);
 
         //http://localhost:8087/api/events/10
