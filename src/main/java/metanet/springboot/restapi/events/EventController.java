@@ -1,7 +1,8 @@
 package metanet.springboot.restapi.events;
 
 import lombok.RequiredArgsConstructor;
-import metanet.springboot.restapi.accounts.AccountAdapter;
+import metanet.springboot.restapi.accounts.Account;
+import metanet.springboot.restapi.accounts.CurrentUser;
 import metanet.springboot.restapi.common.ErrorsResource;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,6 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -83,7 +83,10 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity queryEvents(Pageable pageable, PagedResourcesAssembler<Event> assembler,
-                                      @AuthenticationPrincipal AccountAdapter currentUser) {
+                                      @CurrentUser Account account) {
+                                      //@AuthenticationPrincipal(expression = "account") Account account) {
+                                      //@AuthenticationPrincipal AccountAdapter currentUser) {
+
         Page<Event> eventPage = this.eventRepository.findAll(pageable);
         //PagedModel<EntityModel<Event>> pagedModel = assembler.toModel(eventPage);
 
@@ -100,7 +103,7 @@ public class EventController {
         PagedModel<RepresentationModel<EventResource>> pagedModel = assembler.toModel(eventPage, event -> new EventResource(event));
 
         //access token을 사용하여 조회를 했다면 Event 등록할 수 있는 Link를 제공한다.
-        if(currentUser != null) {
+        if(account != null) {
             pagedModel.add(linkTo(EventController.class).withRel("create-event"));
         }
         return ResponseEntity.ok(pagedModel);
