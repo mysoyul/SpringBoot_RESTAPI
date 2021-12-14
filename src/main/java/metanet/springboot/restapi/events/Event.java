@@ -1,7 +1,9 @@
 package metanet.springboot.restapi.events;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import metanet.springboot.restapi.accounts.Account;
+import metanet.springboot.restapi.accounts.AccountSerializer;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -37,6 +39,7 @@ public class Event {
     //@ManyToOne(cascade = {CascadeType.ALL})
     //@JoinColumn(name="account_id", nullable = false)
     @ManyToOne
+    @JsonSerialize(using = AccountSerializer.class)
     private Account account;
 
     public void update() {
