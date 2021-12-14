@@ -11,6 +11,7 @@ public class EventResource extends RepresentationModel<EventResource> {
 
     public EventResource(Event event) {
         this.event = event;
+        //Self Link 추가
         add(linkTo(EventController.class).slash(event.getId()).withSelfRel());
     }
 

@@ -10,13 +10,12 @@ import java.io.IOException;
 
 //Custom Serializer 클래스
 @JsonComponent
-public class ErrorSerializer extends JsonSerializer<Errors> {
+public class ErrorsSerializer extends JsonSerializer<Errors> {
     @Override
     public void serialize(Errors errors, JsonGenerator gen, SerializerProvider serializers) throws IOException {
         //직렬화 시작
         gen.writeStartArray();
 
-        //필드에러 정보 출력
         /*
         {
         "field": "limitOfEnrollment",
@@ -26,6 +25,7 @@ public class ErrorSerializer extends JsonSerializer<Errors> {
         "rejectedValue": "4"
         }
          */
+        //필드에러 정보 출력
         errors.getFieldErrors().forEach(e -> {
             try {
                 gen.writeStartObject();
@@ -49,6 +49,13 @@ public class ErrorSerializer extends JsonSerializer<Errors> {
             }
         });
 
+        /*
+        {
+            "objectName": "eventDto",
+            "code": "wrongPrices",
+            "defaultMessage": "Values for prices are wrong"
+        }
+         */
         //글로벌에러 정보 출력
         errors.getGlobalErrors().forEach(e -> {
             try {
